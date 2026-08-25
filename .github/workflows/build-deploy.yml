@@ -12,17 +12,15 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
-
   build:
     name: Build Flet Web App
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -34,13 +32,18 @@ jobs:
       - name: Install Flet
         run: |
           python -m pip install --upgrade pip
-          pip install flet==0.86.5
+          python -m pip install flet==0.86.5
 
-      - name: Build web application
+      - name: Build Flet web application
         run: |
-          flet publish main.py \
-            --base-url /motor-grafico-8x8/ \
-            --route-url-strategy hash
+          flet publish main.py --base-url /motor-grafico-8x8/ --route-url-strategy hash
+
+      - name: Verify dist
+        run: |
+          echo "Contenido de dist:"
+          ls -la dist
+          echo "Verificando index.html:"
+          test -f dist/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -49,9 +52,7 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-
     needs: build
-
     runs-on: ubuntu-latest
 
     environment:
@@ -59,10 +60,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
